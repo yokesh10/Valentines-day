@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Valentine's Day</title>
+
+  <!-- Romantic Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Pacifico', cursive;
+      background: linear-gradient(#ffe6eb, #ffd6e0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .container {
+      background: white;
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 92%;
+      max-width: 420px;
+      z-index: 2;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      background: #ff4d6d;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+    }
+
+    canvas {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .petal {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, #ff4d6d 40%, #c1121f);
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      from { transform: translateY(-10vh) rotate(0deg); }
+      to { transform: translateY(110vh) rotate(360deg); }
+    }
+
+    #typeText {
+      position: absolute;
+      top: 70%;
+      width: 100%;
+      font-size: 22px;
+      color: #c1121f;
+      font-family: 'Pacifico', cursive;
+      padding: 0 20px;
+    }
+
+    @media (max-width: 480px) {
+      #typeText { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="formContainer">
+    <h1>Valentine Questions ❤️</h1>
+    <input id="q1" placeholder="What is your name?" />
+    <input id="q2" placeholder="Who do you love?" />
+    <input id="q3" placeholder="Your favourite flower?" />
+    <button onclick="startDrawing()">Submit</button>
+  </div>
+
+  <canvas id="canvas"></canvas>
+  <div id="typeText"></div>
+
+  <audio id="music" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5b3c13e4c7.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    function startDrawing() {
+      const name = q1.value.trim();
+      const love = q2.value.trim();
+      const flower = q3.value.trim();
+
+      if (!name || !love || !flower) {
+        alert('Please answer all questions ❤️');
+        return;
+      }
+
+      const params = new URLSearchParams({ name, love, flower });
+      history.replaceState(null, '', '?' + params.toString());
+
+      formContainer.style.display = 'none';
+
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.display = 'block';
+
+      music.play().catch(()=>{});
+
+      animateHeart(ctx, canvas.width/2, canvas.height/2 - 40, 10, () => {
+        drawFlowers(ctx, 40);
+        fireworks(ctx);
+        typeMessage(`Happy Valentine's Day, ${name}! ❤️\n${name} loves ${love} and sends beautiful ${flower}s forever 🌹`);
+        createPetals();
+      });
+    }
+
+    function animateHeart(ctx, x, y, scale, callback) {
+      let t = 0;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+
+      function draw() {
+        if (t < Math.PI * 2) {
+          const hx = 16 * Math.pow(Math.sin(t), 3);
+          const hy = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+
+          ctx.lineTo(x + hx*scale, y - hy*scale);
+          ctx.strokeStyle = 'red';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          t += 0.02;
+          requestAnimationFrame(draw);
+        } else {
+          ctx.fillStyle = 'red';
+          ctx.fill();
+          callback();
+        }
+      }
+      draw();
+    }
+
+    function drawFlowers(ctx, count) {
+      for (let i=0;i<count;i++) {
+        drawFlower(ctx, Math.random()*ctx.canvas.width, Math.random()*ctx.canvas.height);
+      }
+    }
+
+    function drawFlower(ctx, x, y) {
+      ctx.fillStyle = 'red';
+      for (let i=0;i<6;i++) {
+        const a = i*Math.PI/3;
+        ctx.beginPath();
+        ctx.arc(x + Math.cos(a)*10, y + Math.sin(a)*10, 8, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle = 'yellow';
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    function createPetals() {
+      for (let i=0;i<30;i++) {
+        const p = document.createElement('div');
+        p.className='petal';
+        p.style.left = Math.random()*100+'vw';
+        p.style.animationDuration = 5+Math.random()*5+'s';
+        document.body.appendChild(p);
+      }
+    }
+
+    function typeMessage(text) {
+      const el = document.getElementById('typeText');
+      let i=0;
+      function type() {
+        if (i < text.length) {
+          el.innerHTML += text[i] === '\n' ? '<br>' : text[i];
+          i++;
+          setTimeout(type, 40);
+        }
+      }
+      type();
+    }
+
+    function fireworks(ctx) {
+      for (let i=0;i<80;i++) {
+        setTimeout(()=>{
+          ctx.beginPath();
+          ctx.arc(Math.random()*ctx.canvas.width, Math.random()*ctx.canvas.height/2, 3, 0, Math.PI*2);
+          ctx.fillStyle = `hsl(${Math.random()*360},100%,60%)`;
+          ctx.fill();
+        }, i*30);
+      }
+    }
+
+    window.onload = () => {
+      const p = new URLSearchParams(location.search);
+      if (p.has('name')) {
+        q1.value=p.get('name');
+        q2.value=p.get('love');
+        q3.value=p.get('flower');
+        startDrawing();
+      }
+    };
+  </script>
+
+</body>
+</html>
