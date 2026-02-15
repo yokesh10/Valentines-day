@@ -11,9 +11,27 @@
     body {
       margin: 0;
       font-family: 'Pacifico', cursive;
-      background: radial-gradient(circle at center, #ffe6eb, #ffccd5);
+      background: #ffd6e8; /* light pink background */
       overflow: hidden;
       text-align: center;
+    }
+
+    /* Cinematic intro overlay */
+    #intro {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle, #ffc0cb, #ff9bb3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 40px;
+      z-index: 10;
+      animation: fadeOut 3s ease 2s forwards;
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
     }
 
     .container {
@@ -28,6 +46,12 @@
       width: 90%;
       max-width: 420px;
       z-index: 5;
+      opacity: 0;
+      animation: fadeIn 2s ease 3s forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
 
     input, button {
@@ -53,13 +77,19 @@
       left: 0;
     }
 
+    /* Flower-shaped falling particles */
     .flowerRain {
       position: absolute;
-      top: -50px;
-      width: 20px;
-      height: 20px;
-      background: radial-gradient(circle, #ff4d6d, #c1121f);
+      top: -40px;
+      width: 22px;
+      height: 22px;
+      background: radial-gradient(circle, #ff4d6d 40%, #c1121f);
       border-radius: 50%;
+      box-shadow:
+        0 -10px 0 #ff4d6d,
+        10px 0 0 #ff4d6d,
+        -10px 0 0 #ff4d6d,
+        0 10px 0 #ff4d6d;
       animation: fall linear infinite;
       opacity: 0.9;
     }
@@ -86,6 +116,8 @@
 </head>
 <body>
 
+  <div id="intro">A little surprise for Sabrina… ❤️</div>
+
   <div class="container" id="formContainer">
     <h1>Valentine Questions ❤️</h1>
     <input id="q1" placeholder="What is your favorite memory of us?" />
@@ -97,7 +129,6 @@
   <canvas id="canvas"></canvas>
   <div id="typeText"></div>
 
-  <!-- Song: Fall in love again and again (looped) -->
   <audio id="music" loop>
     <source src="https://cdn.pixabay.com/download/audio/2023/02/28/audio_1a5b4c9c6f.mp3" type="audio/mpeg">
   </audio>
@@ -120,12 +151,12 @@
       music.play().catch(()=>{});
 
       animate3DHeart(ctx, canvas.width/2, canvas.height/2, 12, () => {
+        drawNameParticles(ctx);
         typeMessage("Happy Valentines day Sabrina. Yokesh Loves Sabrina to the moon! ❤️");
         startFlowerRain();
       });
     }
 
-    // Dramatic glowing 3D heart
     function animate3DHeart(ctx, x, y, scale, callback) {
       let t = 0;
 
@@ -165,6 +196,20 @@
       draw();
     }
 
+    /* Particles forming Sabrina's name */
+    function drawNameParticles(ctx) {
+      const text = "SABRINA";
+      ctx.font = "bold 80px Arial";
+      const metrics = ctx.measureText(text);
+      const x = ctx.canvas.width/2 - metrics.width/2;
+      const y = ctx.canvas.height/2 + 30;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.globalAlpha = 0.15;
+      ctx.fillText(text, x, y);
+      ctx.globalAlpha = 1;
+    }
+
     function typeMessage(text) {
       const el = document.getElementById('typeText');
       let i = 0;
@@ -178,7 +223,6 @@
       type();
     }
 
-    // Slow raining flowers
     function startFlowerRain() {
       setInterval(() => {
         const f = document.createElement('div');
@@ -186,7 +230,6 @@
         f.style.left = Math.random()*100 + 'vw';
         f.style.animationDuration = (6 + Math.random()*4) + 's';
         document.body.appendChild(f);
-
         setTimeout(()=>f.remove(), 10000);
       }, 300);
     }
