@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Happy Valentine's Day</title>
 
-  <!-- Romantic Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 
   <style>
@@ -94,9 +93,9 @@
 
   <div class="container" id="formContainer">
     <h1>Valentine Questions ❤️</h1>
-    <input id="q1" placeholder="When did we first meet?" />
-    <input id="q2" placeholder="Favorite Memory of us?" />
-    <input id="q3" placeholder="What do you like about us?" />
+    <input id="q1" placeholder="What is your favorite memory of us?" />
+    <input id="q2" placeholder="When did we first meet?" />
+    <input id="q3" placeholder="What do you never want to change about us?" />
     <button onclick="startDrawing()">Submit</button>
   </div>
 
@@ -109,17 +108,14 @@
 
   <script>
     function startDrawing() {
-      const name = q1.value.trim();
-      const love = q2.value.trim();
-      const flower = q3.value.trim();
+      const a1 = q1.value.trim();
+      const a2 = q2.value.trim();
+      const a3 = q3.value.trim();
 
-      if (!name || !love || !flower) {
+      if (!a1 || !a2 || !a3) {
         alert('Please answer all questions ❤️');
         return;
       }
-
-      const params = new URLSearchParams({ name, love, flower });
-      history.replaceState(null, '', '?' + params.toString());
 
       formContainer.style.display = 'none';
 
@@ -135,7 +131,7 @@
       animateHeart(ctx, canvas.width/2, canvas.height/2 - 40, 10, () => {
         drawFlowers(ctx, 40);
         fireworks(ctx);
-        typeMessage(`Happy Valentine's Day, ${name}! ❤️\n${name} loves ${love} and sends beautiful ${flower}s forever 🌹`);
+        typeMessage("Happy Valentines day Sabrina. Yokesh Loves Sabrina to the moon! ❤️");
         createPetals();
       });
     }
@@ -219,16 +215,6 @@
         }, i*30);
       }
     }
-
-    window.onload = () => {
-      const p = new URLSearchParams(location.search);
-      if (p.has('name')) {
-        q1.value=p.get('name');
-        q2.value=p.get('love');
-        q3.value=p.get('flower');
-        startDrawing();
-      }
-    };
   </script>
 
 </body>
