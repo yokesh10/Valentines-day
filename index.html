@@ -11,45 +11,39 @@
     body {
       margin: 0;
       font-family: 'Pacifico', cursive;
-      background: linear-gradient(#ffe6eb, #ffd6e0);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      background: radial-gradient(circle at center, #ffe6eb, #ffccd5);
       overflow: hidden;
       text-align: center;
     }
 
     .container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       background: white;
       padding: 24px;
       border-radius: 20px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      width: 92%;
+      width: 90%;
       max-width: 420px;
-      z-index: 2;
+      z-index: 5;
     }
 
-    input {
+    input, button {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
       border-radius: 12px;
       border: 1px solid #ccc;
-      font-family: Arial, sans-serif;
       font-size: 16px;
     }
 
     button {
-      width: 100%;
       background: #ff4d6d;
       color: white;
       border: none;
-      padding: 14px;
-      border-radius: 12px;
       cursor: pointer;
-      font-size: 16px;
-      font-family: Arial, sans-serif;
     }
 
     canvas {
@@ -59,33 +53,34 @@
       left: 0;
     }
 
-    .petal {
+    .flowerRain {
       position: absolute;
-      width: 14px;
-      height: 14px;
-      background: radial-gradient(circle, #ff4d6d 40%, #c1121f);
+      top: -50px;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #ff4d6d, #c1121f);
       border-radius: 50%;
-      opacity: 0.8;
       animation: fall linear infinite;
+      opacity: 0.9;
     }
 
     @keyframes fall {
-      from { transform: translateY(-10vh) rotate(0deg); }
-      to { transform: translateY(110vh) rotate(360deg); }
+      to {
+        transform: translateY(110vh) rotate(360deg);
+      }
     }
 
     #typeText {
       position: absolute;
-      top: 70%;
+      bottom: 10%;
       width: 100%;
-      font-size: 22px;
+      font-size: 26px;
       color: #c1121f;
-      font-family: 'Pacifico', cursive;
       padding: 0 20px;
     }
 
     @media (max-width: 480px) {
-      #typeText { font-size: 18px; }
+      #typeText { font-size: 20px; }
     }
   </style>
 </head>
@@ -102,17 +97,14 @@
   <canvas id="canvas"></canvas>
   <div id="typeText"></div>
 
+  <!-- Song: Fall in love again and again (looped) -->
   <audio id="music" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5b3c13e4c7.mp3" type="audio/mpeg">
+    <source src="https://cdn.pixabay.com/download/audio/2023/02/28/audio_1a5b4c9c6f.mp3" type="audio/mpeg">
   </audio>
 
   <script>
     function startDrawing() {
-      const a1 = q1.value.trim();
-      const a2 = q2.value.trim();
-      const a3 = q3.value.trim();
-
-      if (!a1 || !a2 || !a3) {
+      if (!q1.value.trim() || !q2.value.trim() || !q3.value.trim()) {
         alert('Please answer all questions ❤️');
         return;
       }
@@ -121,83 +113,64 @@
 
       const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d');
-
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       canvas.style.display = 'block';
 
       music.play().catch(()=>{});
 
-      animateHeart(ctx, canvas.width/2, canvas.height/2 - 40, 10, () => {
-        drawFlowers(ctx, 40);
-        fireworks(ctx);
-        typeMessage("Happy Valentines day Sabrina! Yokesh Loves you to the moon! ❤️");
-        createPetals();
+      animate3DHeart(ctx, canvas.width/2, canvas.height/2, 12, () => {
+        typeMessage("Happy Valentines day Sabrina. Yokesh Loves Sabrina to the moon! ❤️");
+        startFlowerRain();
       });
     }
 
-    function animateHeart(ctx, x, y, scale, callback) {
+    // Dramatic glowing 3D heart
+    function animate3DHeart(ctx, x, y, scale, callback) {
       let t = 0;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
 
       function draw() {
-        if (t < Math.PI * 2) {
-          const hx = 16 * Math.pow(Math.sin(t), 3);
-          const hy = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+        ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
 
-          ctx.lineTo(x + hx*scale, y - hy*scale);
-          ctx.strokeStyle = 'red';
-          ctx.lineWidth = 3;
-          ctx.stroke();
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(1 + Math.sin(Date.now()/300)*0.05, 1 + Math.sin(Date.now()/300)*0.05);
 
-          t += 0.02;
+        ctx.beginPath();
+        for (let a=0; a<Math.PI*2; a+=0.01) {
+          const hx = 16*Math.pow(Math.sin(a),3);
+          const hy = 13*Math.cos(a)-5*Math.cos(2*a)-2*Math.cos(3*a)-Math.cos(4*a);
+          ctx.lineTo(hx*scale, -hy*scale);
+        }
+
+        const gradient = ctx.createRadialGradient(0,0,10,0,0,150);
+        gradient.addColorStop(0,'#ff758f');
+        gradient.addColorStop(1,'#c1121f');
+
+        ctx.fillStyle = gradient;
+        ctx.shadowColor = '#ff4d6d';
+        ctx.shadowBlur = 40;
+        ctx.fill();
+
+        ctx.restore();
+
+        if (t < 120) {
+          t++;
           requestAnimationFrame(draw);
         } else {
-          ctx.fillStyle = 'red';
-          ctx.fill();
           callback();
         }
       }
+
       draw();
-    }
-
-    function drawFlowers(ctx, count) {
-      for (let i=0;i<count;i++) {
-        drawFlower(ctx, Math.random()*ctx.canvas.width, Math.random()*ctx.canvas.height);
-      }
-    }
-
-    function drawFlower(ctx, x, y) {
-      ctx.fillStyle = 'red';
-      for (let i=0;i<6;i++) {
-        const a = i*Math.PI/3;
-        ctx.beginPath();
-        ctx.arc(x + Math.cos(a)*10, y + Math.sin(a)*10, 8, 0, Math.PI*2);
-        ctx.fill();
-      }
-      ctx.fillStyle = 'yellow';
-      ctx.beginPath();
-      ctx.arc(x, y, 6, 0, Math.PI*2);
-      ctx.fill();
-    }
-
-    function createPetals() {
-      for (let i=0;i<30;i++) {
-        const p = document.createElement('div');
-        p.className='petal';
-        p.style.left = Math.random()*100+'vw';
-        p.style.animationDuration = 5+Math.random()*5+'s';
-        document.body.appendChild(p);
-      }
     }
 
     function typeMessage(text) {
       const el = document.getElementById('typeText');
-      let i=0;
+      let i = 0;
       function type() {
         if (i < text.length) {
-          el.innerHTML += text[i] === '\n' ? '<br>' : text[i];
+          el.innerHTML += text[i];
           i++;
           setTimeout(type, 40);
         }
@@ -205,17 +178,20 @@
       type();
     }
 
-    function fireworks(ctx) {
-      for (let i=0;i<80;i++) {
-        setTimeout(()=>{
-          ctx.beginPath();
-          ctx.arc(Math.random()*ctx.canvas.width, Math.random()*ctx.canvas.height/2, 3, 0, Math.PI*2);
-          ctx.fillStyle = `hsl(${Math.random()*360},100%,60%)`;
-          ctx.fill();
-        }, i*30);
-      }
+    // Slow raining flowers
+    function startFlowerRain() {
+      setInterval(() => {
+        const f = document.createElement('div');
+        f.className = 'flowerRain';
+        f.style.left = Math.random()*100 + 'vw';
+        f.style.animationDuration = (6 + Math.random()*4) + 's';
+        document.body.appendChild(f);
+
+        setTimeout(()=>f.remove(), 10000);
+      }, 300);
     }
   </script>
 
 </body>
 </html>
+
